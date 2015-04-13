@@ -4,6 +4,7 @@ import "github.com/gorilla/mux"
 
 type Namespace struct {
 	path   string
+	// Router for extenting default functionality.
 	Router *mux.Router
 }
 

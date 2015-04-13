@@ -8,7 +8,6 @@ import (
 
 type Model struct {
 	name string
-	//namespace string
 	// Router for extenting default functionality.
 	Router *mux.Router
 }
