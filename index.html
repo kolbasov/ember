@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Ember by kolbasov</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Ember</h1>
+      <h2 class="project-tagline"></h2>
+      <a href="https://github.com/kolbasov/ember" class="btn">View on GitHub</a>
+      <a href="https://github.com/kolbasov/ember/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/kolbasov/ember/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p><a href="https://travis-ci.org/kolbasov/ember"><img src="https://travis-ci.org/kolbasov/ember.svg?branch=master" alt="Build Status"></a>
+<a href="https://godoc.org/github.com/kolbasov/ember"><img src="https://godoc.org/github.com/kolbasov/ember?status.svg" alt="GoDoc"></a></p>
+
+<h2>
+<a id="ember" class="anchor" href="#ember" aria-hidden="true"><span class="octicon octicon-link"></span></a>Ember</h2>
+
+<p>Go package <strong>ember</strong> is a simple back-end for <a href="http://emberjs.com">http://emberjs.com</a> applications which use the RESTAdapter.</p>
+
+<h2>
+<a id="using-ember" class="anchor" href="#using-ember" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Ember</h2>
+
+<h3>
+<a id="getting-ember" class="anchor" href="#getting-ember" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Ember</h3>
+
+<pre><code>go get github.com/kolbasov/ember
+</code></pre>
+
+<h3>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Tests</h3>
+
+<pre><code>go test
+</code></pre>
+
+<h3>
+<a id="todomvc-demo-application" class="anchor" href="#todomvc-demo-application" aria-hidden="true"><span class="octicon octicon-link"></span></a>TodoMVC Demo Application</h3>
+
+<p>The <code>example</code> folder contains TodoMVC demo application.</p>
+
+<pre><code>cd example
+go run main.go
+</code></pre>
+
+<h3>
+<a id="defining-routes" class="anchor" href="#defining-routes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Defining routes</h3>
+
+<p>Let's assume that our applications shows an editable list of people. Here is the project's structure.</p>
+
+<pre><code>app
+  public
+    assets
+      app.cs
+      app.js
+      ...
+  index.html
+main.go
+</code></pre>
+
+<p>We need to define routes for the index.html, assets and REST API. Also, let's prefix the API with <code>api/v1</code>.</p>
+
+<table>
+  <thead>
+    <tr>
+<th>Action</th>
+<th>HTTP Verb</th>
+<th>URL</th>
+</tr>
+  </thead>
+  <tbody>
+    <tr>
+<th>index.html</th>
+<td>GET</td>
+<td>/</td>
+</tr>
+    <tr>
+<th>assets</th>
+<td>GET</td>
+<td>/assets</td>
+</tr>
+    <tr><th colspan="3">REST API</th></tr>
+    <tr>
+<th>Find</th>
+<td>GET</td>
+<td>api/v1/people/1</td>
+</tr>
+    <tr>
+<th>Find All</th>
+<td>GET</td>
+<td>api/v1/people</td>
+</tr>
+    <tr>
+<th>Update</th>
+<td>PUT</td>
+<td>api/v1/people/1</td>
+</tr>
+    <tr>
+<th>Create</th>
+<td>POST</td>
+<td>api/v1/people</td>
+</tr>
+    <tr>
+<th>Delete</th>
+<td>DELETE</td>
+<td>api/v1/people/1</td>
+</tr>
+  </tbody>
+</table>
+
+<p>First, we need to create an Ember instance.</p>
+
+<div class="highlight highlight-go"><pre><span class="pl-c">// Create an ember instance.</span>
+<span class="pl-smi">e</span> <span class="pl-k">:=</span> ember.<span class="pl-c1">New</span>()</pre></div>
+
+<p>Then we can define routes for the index.html and assets.</p>
+
+<div class="highlight highlight-go"><pre><span class="pl-c">// Register a route for public/index.html</span>
+e.<span class="pl-c1">Index</span>(<span class="pl-s"><span class="pl-pds">"</span>public/index.html<span class="pl-pds">"</span></span>)
+
+<span class="pl-c">// Register a route for public/assets</span>
+e.<span class="pl-c1">Assets</span>(<span class="pl-s"><span class="pl-pds">"</span>/assets<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>public/assets<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>We use <code>Ember.Namespace</code> method to create a namespace.</p>
+
+<div class="highlight highlight-go"><pre><span class="pl-c">// Register a namespace.</span>
+<span class="pl-smi">api</span> <span class="pl-k">:=</span> e.<span class="pl-c1">Namespace</span>(<span class="pl-s"><span class="pl-pds">"</span>/api/v1<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Now we can add a model to the namespace and define its routes.</p>
+
+<div class="highlight highlight-go"><pre><span class="pl-c">// Create routes for a model.</span>
+<span class="pl-smi">people</span> <span class="pl-k">:=</span> api.<span class="pl-c1">Model</span>(<span class="pl-s"><span class="pl-pds">"</span>people<span class="pl-pds">"</span></span>)
+
+<span class="pl-c">// GET /api/v1/people</span>
+people.<span class="pl-c1">FindAll</span>(getPeople)
+...</pre></div>
+
+<p>Call the <code>Ember.Run</code> method to start the application.</p>
+
+<div class="highlight highlight-go"><pre><span class="pl-c">// Serve requests.</span>
+e.<span class="pl-c1">Run</span>(<span class="pl-s"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Here is a part of the main.go file:</p>
+
+<div class="highlight highlight-go"><pre>    <span class="pl-k">import</span> (
+        <span class="pl-s"><span class="pl-pds">"</span>net/http<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>github.com/kolbasov/ember<span class="pl-pds">"</span></span>
+    )
+
+    <span class="pl-k">func</span> <span class="pl-en">main</span>() {
+        <span class="pl-c">// Create an ember instance.</span>
+        <span class="pl-smi">e</span> <span class="pl-k">:=</span> ember.<span class="pl-c1">New</span>()
+
+        <span class="pl-c">// Register a route for public/index.html</span>
+        e.<span class="pl-c1">Index</span>(<span class="pl-s"><span class="pl-pds">"</span>public/index.html<span class="pl-pds">"</span></span>)
+
+        <span class="pl-c">// Register a route for public/assets</span>
+        e.<span class="pl-c1">Assets</span>(<span class="pl-s"><span class="pl-pds">"</span>/assets<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>public/assets<span class="pl-pds">"</span></span>)
+
+        <span class="pl-c">// Register a namespace.</span>
+        <span class="pl-smi">api</span> <span class="pl-k">:=</span> e.<span class="pl-c1">Namespace</span>(<span class="pl-s"><span class="pl-pds">"</span>/api/v1<span class="pl-pds">"</span></span>)
+
+        <span class="pl-c">// Create routes for a model.</span>
+        <span class="pl-smi">people</span> <span class="pl-k">:=</span> api.<span class="pl-c1">Model</span>(<span class="pl-s"><span class="pl-pds">"</span>people<span class="pl-pds">"</span></span>)
+
+        <span class="pl-c">// GET /api/v1/people</span>
+        people.<span class="pl-c1">FindAll</span>(getPeople)
+
+        <span class="pl-c">// GET /api/v1/people/{id}</span>
+        people.<span class="pl-c1">Find</span>(getPerson)
+
+        <span class="pl-c">// POST /api/v1/people</span>
+        people.<span class="pl-c1">Create</span>(addPerson)
+
+        <span class="pl-c">// PUT /api/v1/people/{id}</span>
+        people.<span class="pl-c1">Update</span>(updatePerson)
+
+        <span class="pl-c">// DELETE /api/v1/people/{id}</span>
+        people.<span class="pl-c1">Delete</span>(deletePerson)
+
+        <span class="pl-c">// Serve requests.</span>
+        e.<span class="pl-c1">Run</span>(<span class="pl-s"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>)
+    }
+
+<span class="pl-c">// Functions getPeople, getPerson, updatePerson and deletePerson.</span>
+...</pre></div>
+
+<p>The application serves the following routes:</p>
+
+<table>
+  <thead>
+    <tr>
+<th>HTTP Verb</th>
+<th>URL</th>
+</tr>
+  </thead>
+  <tbody>
+    <tr>
+        <th>GET</th>
+        <td>http://localhost:8080</td>          
+    </tr>
+    <tr>
+        <th>GET/POST</th>
+        <td>http://localhost:8080/api/v1/people</td>        
+    </tr>
+    <tr>
+        <th>PUT/DELETE</th>
+        <td>http://localhost:8080/api/v1/people/1</td>          
+    </tr>
+  </tbody>
+</table>
+
+<p>Also, it's possible to define a route for a model without a namespace.</p>
+
+<div class="highlight highlight-go"><pre>    <span class="pl-k">import</span> (
+        <span class="pl-s"><span class="pl-pds">"</span>net/http<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>github.com/kolbasov/ember<span class="pl-pds">"</span></span>
+    )
+
+    <span class="pl-k">func</span> <span class="pl-en">main</span>() {
+        <span class="pl-c">// Create an ember instance.</span>
+        <span class="pl-smi">e</span> <span class="pl-k">:=</span> ember.<span class="pl-c1">New</span>()
+
+        <span class="pl-c">// Create routes for a model without a namespace and register a route.</span>
+        <span class="pl-c">// GET /stats</span>
+        e.<span class="pl-c1">Model</span>(<span class="pl-s"><span class="pl-pds">"</span>stats<span class="pl-pds">"</span></span>).<span class="pl-c1">FindAll</span>(getStats)
+
+        <span class="pl-c">// Serve requests.</span>
+        e.<span class="pl-c1">Run</span>(<span class="pl-s"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>)
+    }</pre></div>
+
+<p>The application will serve the following route:</p>
+
+<table>
+  <thead>
+    <tr>
+<th>HTTP Verb</th>
+<th>URL</th>
+</tr>
+  </thead>
+  <tbody>
+    <tr>
+        <th>GET</th>
+        <td>http://localhost:8080/stats</td>        
+    </tr>
+  </tbody>
+</table>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/kolbasov/ember">Ember</a> is maintained by <a href="https://github.com/kolbasov">kolbasov</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
