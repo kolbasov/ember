@@ -1,15 +1,15 @@
 package ember
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-var addr string
+var e = New()
 
 type routeTest struct {
 	method   string
@@ -18,11 +18,6 @@ type routeTest struct {
 }
 
 func init() {
-	flag.StringVar(&addr, "addr", ":8080", "Address, default :8080")
-	flag.Parse()
-
-	e := New()
-
 	// Register a route for index.html file.
 	e.Index("example/dist/index.html")
 
@@ -52,9 +47,6 @@ func init() {
 
 	// DELETE /api/v1/people/{id}
 	people.Delete(responce)
-
-	// Not the best idea...
-	go e.Run(addr)
 }
 
 func responce(w http.ResponseWriter, req *http.Request) {
@@ -62,25 +54,37 @@ func responce(w http.ResponseWriter, req *http.Request) {
 }
 
 func TestIndex(t *testing.T) {
-	testFile(t, "/")
+	server := httptest.NewServer(e.Router)
+	defer server.Close()
+
+	testFile(t, server, "/")
 }
 
 func TestAssets(t *testing.T) {
+	server := httptest.NewServer(e.Router)
+	defer server.Close()
+
 	tests := []string{
 		"/assets/example.css",
 		"/assets/example.js",
 	}
 
 	for _, test := range tests {
-		testFile(t, test)
+		testFile(t, server, test)
 	}
 }
 
 func TestNotFound(t *testing.T) {
-	testFile(t, "/devnull")
+	server := httptest.NewServer(e.Router)
+	defer server.Close()
+
+	testFile(t, server, "/devnull")
 }
 
 func TestGetModel(t *testing.T) {
+	server := httptest.NewServer(e.Router)
+	defer server.Close()
+
 	tests := []routeTest{
 		{
 			method:   "GET",
@@ -90,11 +94,14 @@ func TestGetModel(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		testRoute(t, test)
+		testRoute(t, server, test)
 	}
 }
 
 func TestNamespace(t *testing.T) {
+	server := httptest.NewServer(e.Router)
+	defer server.Close()
+
 	tests := []routeTest{
 		{
 			method:   "GET",
@@ -124,12 +131,12 @@ func TestNamespace(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		testRoute(t, test)
+		testRoute(t, server, test)
 	}
 }
 
-func testRoute(t *testing.T, test routeTest) {
-	res, err := sendRequest(test.method, "http://localhost"+addr+test.path)
+func testRoute(t *testing.T, server *httptest.Server, test routeTest) {
+	res, err := sendRequest(test.method, server.URL+test.path)
 	if err != nil {
 		panic(err)
 	}
@@ -154,8 +161,8 @@ func testRoute(t *testing.T, test routeTest) {
 	)
 }
 
-func testFile(t *testing.T, path string) {
-	res, err := sendRequest("GET", "http://localhost"+addr+path)
+func testFile(t *testing.T, server *httptest.Server, path string) {
+	res, err := sendRequest("GET", server.URL+path)
 	if err != nil {
 		panic(err)
 	}
