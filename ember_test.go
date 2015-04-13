@@ -19,10 +19,10 @@ type routeTest struct {
 
 func init() {
 	// Register a route for index.html file.
-	e.Index("example/dist/index.html")
+	e.Index("./example/dist/index.html")
 
 	// Register a route for assets.
-	e.Assets("/assets", "example/dist/assets")
+	e.Assets("/assets", "./example/dist/assets")
 
 	// Create a model and register a route for /stats
 	e.Model("stats").FindAll(responce)
