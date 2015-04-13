@@ -4,4 +4,7 @@ go:
 before_install:
     - go get github.com/gorilla/mux
 before_script:
-    - ls .
+    - pwd
+cache:
+    directories:
+        - examlpe
