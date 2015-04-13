@@ -4,6 +4,4 @@ go:
 before_install:
     - go get github.com/gorilla/mux
 before_script:
-    - ls example
-    - ls example/dist
-    - ls example/dist/assets
+    - ls .
