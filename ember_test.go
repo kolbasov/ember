@@ -25,7 +25,7 @@ func init() {
 	e.Assets("/assets", "./example/dist/assets")
 
 	// Create a model and register a route for /stats
-	e.Model("stats").FindAll(responce)
+	e.Model("stats").FindAll(sendResponse)
 
 	// Register a namespace.
 	api := e.Namespace("/api/v1")
@@ -34,23 +34,19 @@ func init() {
 	people := api.Model("people")
 
 	// GET /api/v1/people
-	people.FindAll(responce)
+	people.FindAll(sendResponse)
 
 	// GET /api/v1/people/{id}
-	people.Find(responce)
+	people.Find(sendResponse)
 
 	// POST /api/v1/people
-	people.Create(responce)
+	people.Create(sendResponse)
 
 	// PUT /api/v1/people/{id}
-	people.Update(responce)
+	people.Update(sendResponse)
 
 	// DELETE /api/v1/people/{id}
-	people.Delete(responce)
-}
-
-func responce(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "%v %v", req.Method, req.URL)
+	people.Delete(sendResponse)
 }
 
 func TestIndex(t *testing.T) {
@@ -182,4 +178,8 @@ func sendRequest(method string, url string) (res *http.Response, err error) {
 
 	client := &http.Client{}
 	return client.Do(req)
+}
+
+func sendResponse(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "%v %v", req.Method, req.URL)
 }
